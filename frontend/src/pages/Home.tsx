@@ -7,7 +7,7 @@ function Home() {
   useEffect(() => {
     axios.get("http://localhost:5000/") // backend API
       .then((res) => setMessage(res.data))
-      .catch((err) => setMessage("Error connecting to backend ❌"));
+          .catch((_err) => setMessage("Error connecting to backend ❌"));
   }, []);
 
   return (

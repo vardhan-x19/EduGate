@@ -5,7 +5,7 @@ import dbConnection from "./DB/db";
 import userRouter from "./routes/userRouter";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
-
+import quizRouter from "./routes/quizRouter";
 const app = express();
 const PORT = process.env.PORT || 5000;
 dotenv.config();
@@ -21,6 +21,7 @@ app.get("/", (req: Request, res: Response) => {
   res.send("🚀 Backend with TypeScript is running!");
 });
 app.use("/users", userRouter);
+app.use("/quiz", quizRouter);
 
 app.listen(PORT, () => {
   console.log(`⚡ Server is running on http://localhost:${PORT}`);

@@ -31,6 +31,7 @@ const staggerContainer = {
 };
 
 const Landing = () => {
+  
   const features = [
     {
       icon: Brain,

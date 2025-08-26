@@ -23,7 +23,7 @@ const Signup = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    axios.post("http://localhost:9000/users/register", formData)
+    axios.post("http://localhost:5000/users/register", formData)
       .then(respose => {
         console.log("Registration Processed:", respose.data);
         redirect("/login");

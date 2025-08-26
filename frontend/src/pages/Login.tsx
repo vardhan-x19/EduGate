@@ -9,8 +9,10 @@ import { Separator } from "@/components/ui/separator";
 import { Brain, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import Layout from "@/components/layout/Layout";
 import axios from "axios";
-
+import { login } from "../store/userLogin";
+import { useDispatch } from "react-redux";
 const Login = () => {
+   const dispatch = useDispatch();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false); // for loading state
   const [formData, setFormData] = useState({
@@ -22,9 +24,12 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     try {
+      console.log("Attempting login with:", formData);
       // Call your API endpoint for login
-      const response = await axios.post("http://localhost:5000/api/users/login", formData);
-      console.log("✅ Login success:", response.data);
+      const response = await axios.post("http://localhost:5000/users/login", formData);
+      console.log("✅ Login success:", response.data.token);
+      dispatch(login(response.data.token));
+      localStorage.setItem("quiztoken", response.data.token);
       // You can redirect or store token here
     } catch (error: any) {
       console.error("❌ Login failed:", error.response?.data || error.message);

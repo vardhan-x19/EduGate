@@ -14,7 +14,11 @@ dbConnection();
 app.use(morgan("dev"));
 
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:8080", // or your frontend domain
+  credentials: true
+}));
+
 app.use(express.json());
 app.use(cookieParser());
 app.get("/", (req: Request, res: Response) => {

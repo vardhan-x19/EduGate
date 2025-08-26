@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Link, redirect } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,8 @@ import { Brain, User, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import Layout from "@/components/layout/Layout";
 import axios from "axios";
 import { error } from "console";
-
+import {register} from "../store/userLogin";
+import { useDispatch } from "react-redux";
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -21,15 +22,19 @@ const Signup = () => {
     role: "student" // Default role changed
   });
 
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     axios.post("http://localhost:5000/users/register", formData)
-      .then(respose => {
-        console.log("Registration Processed:", respose.data);
-        redirect("/login");
+      .then(response => {
+        console.log("Registration Processed:", response.data);
+        dispatch(register(response.data.token));
+        localStorage.setItem("quiztoken", response.data.token);
+        navigate("/");
       }).catch(error => {
         console.error("Registration Error:", error.response?.data || error.message);
-      })
+      });
   };
 
   return (

@@ -1,12 +1,17 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Brain, User, Trophy } from "lucide-react";
+import { useSelector, useDispatch } from "react-redux";
+import { logout } from "../../store/userLogin";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const isLogin = useSelector((state: any) => state.user.isLoggedIn);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const navigation = [
     { name: "Home", href: "/" },
@@ -17,6 +22,14 @@ const Header = () => {
   ];
 
   const isActive = (path: string) => location.pathname === path;
+
+  const handleLogout = async () => {
+    // Call your logout API here
+    await fetch("http://localhost:5000/logout", { method: "POST", credentials: "include" });
+    dispatch(logout());
+    localStorage.removeItem("quiztoken");
+    navigate("/login");
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -46,12 +59,20 @@ const Header = () => {
 
         {/* Desktop Auth Buttons */}
         <div className="hidden md:flex items-center space-x-3">
-          <Button variant="ghost" size="sm" asChild>
-            <Link to="/login">Sign In</Link>
-          </Button>
-          <Button variant="gradient" size="sm" asChild>
-            <Link to="/signup">Get Started</Link>
-          </Button>
+          {isLogin ? (
+            <Button variant="ghost" size="sm" onClick={handleLogout}>
+              Logout
+            </Button>
+          ) : (
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/login">Sign In</Link>
+            </Button>
+          )}
+          {!isLogin && (
+            <Button variant="gradient" size="sm" asChild>
+              <Link to="/signup">Get Started</Link>
+            </Button>
+          )}
         </div>
 
         {/* Mobile Menu Button */}
@@ -90,17 +111,26 @@ const Header = () => {
             </Link>
           ))}
           <div className="pt-3 border-t space-y-2">
-            <Button variant="ghost" className="w-full justify-start" asChild>
-              <Link to="/login" onClick={() => setIsMenuOpen(false)}>
+            {isLogin ? (
+              <Button variant="ghost" className="w-full justify-start" onClick={() => { setIsMenuOpen(false); handleLogout(); }}>
                 <User className="h-4 w-4 mr-2" />
-                Sign In
-              </Link>
-            </Button>
-            <Button variant="gradient" className="w-full" asChild>
-              <Link to="/signup" onClick={() => setIsMenuOpen(false)}>
-                Get Started
-              </Link>
-            </Button>
+                Logout
+              </Button>
+            ) : (
+              <>
+                <Button variant="ghost" className="w-full justify-start" asChild>
+                  <Link to="/login" onClick={() => setIsMenuOpen(false)}>
+                    <User className="h-4 w-4 mr-2" />
+                    Sign In
+                  </Link>
+                </Button>
+                <Button variant="gradient" className="w-full" asChild>
+                  <Link to="/signup" onClick={() => setIsMenuOpen(false)}>
+                    Get Started
+                  </Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </motion.div>

@@ -21,17 +21,19 @@ import {
   Users
 } from "lucide-react";
 import Layout from "@/components/layout/Layout";
-
+import { useSelector } from "react-redux";
 const Dashboard = () => {
+  const userProfile = useSelector((state: any) => state.user.user);
   // Mock user data
+  console.log("User Profile from Redux:", userProfile);
   const user = {
-    name: "Alex Rodriguez",
-    avatar: "",
-    level: 12,
-    xp: 2720,
-    xpToNextLevel: 3000,
-    rank: "#2",
-    streak: 8
+    name: userProfile.name || "Alex Rodriguez",
+    avatar: userProfile.avatar || "",
+    level: userProfile.level || 1,
+    xp: userProfile.xp || 0,
+    xpToNextLevel: 0,
+    rank: "0",
+    streak: 0
   };
 
   const stats = [

@@ -87,7 +87,7 @@ import NotFound from "./pages/NotFound";
 import { useEffect } from "react";
 const queryClient = new QueryClient();
 import { useSelector, useDispatch } from "react-redux";
-import { login } from "./store/userLogin";
+import { login } from "./store/user";
 import axios from "axios";
 // import Navbar from "./components/Navbar"; // Assuming you have a Navbar component
 
@@ -102,7 +102,7 @@ const App = () => {
       },
     })
       .then(response => {
-        dispatch(login(response.data.token));
+        dispatch(login({ token: response.data.token, user: response.data.user }));
         console.log("Data fetched successfully:", response.data);
       })
       .catch(error => {

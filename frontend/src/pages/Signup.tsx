@@ -11,7 +11,7 @@ import { Brain, User, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import Layout from "@/components/layout/Layout";
 import axios from "axios";
 import { error } from "console";
-import {register} from "../store/userLogin";
+import {register} from "../store/user";
 import { useDispatch } from "react-redux";
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -29,7 +29,7 @@ const Signup = () => {
     axios.post("http://localhost:5000/users/register", formData)
       .then(response => {
         console.log("Registration Processed:", response.data);
-        dispatch(register(response.data.token));
+        dispatch(register({ token: response.data.token, user: response.data.user }));
         localStorage.setItem("quiztoken", response.data.token);
         navigate("/");
       }).catch(error => {

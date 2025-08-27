@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,7 @@ import { login } from "../store/userLogin";
 import { useDispatch } from "react-redux";
 const Login = () => {
    const dispatch = useDispatch();
+   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false); // for loading state
   const [formData, setFormData] = useState({
@@ -27,10 +28,10 @@ const Login = () => {
       console.log("Attempting login with:", formData);
       // Call your API endpoint for login
       const response = await axios.post("http://localhost:5000/users/login", formData);
-      console.log("✅ Login success:", response.data.token);
-      dispatch(login(response.data.token));
+      console.log("✅ Login success:", response.data.user);
+      dispatch(login({ token: response.data.token, user: response.data.user }));
       localStorage.setItem("quiztoken", response.data.token);
-      // You can redirect or store token here
+      navigate("/dashboard"); // Redirect to dashboard on success
     } catch (error: any) {
       console.error("❌ Login failed:", error.response?.data || error.message);
     } finally {

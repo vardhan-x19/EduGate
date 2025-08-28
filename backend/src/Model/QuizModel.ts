@@ -1,18 +1,20 @@
-// models/Quiz.ts
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IQuestion {
   questionText: string;
   options: string[];
-  correctAnswer: number; // store index of correct option (0,1,2,3)
+  correctAnswer: number; // index of correct option
 }
 
 export interface IQuiz extends Document {
   title: string;
   description?: string;
-  createdBy: mongoose.Types.ObjectId; // Teacher reference
+  topic?: string;
+  difficulty?: "Beginner" | "Intermediate" | "Advanced";
+  timeLimit?: number; // in minutes
+  createdBy: mongoose.Types.ObjectId;
   questions: IQuestion[];
-  shareCode: string; // Unique code to share with students
+  shareCode: string;
   createdAt: Date;
 }
 
@@ -26,6 +28,9 @@ const QuizSchema = new Schema<IQuiz>(
   {
     title: { type: String, required: true },
     description: { type: String },
+    topic: { type: String },
+    difficulty: { type: String, enum: ["Beginner", "Intermediate", "Advanced"] },
+    timeLimit: { type: Number }, // minutes
     createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
     questions: { type: [QuestionSchema], default: [] },
     shareCode: { type: String, required: true, unique: true },
@@ -34,37 +39,3 @@ const QuizSchema = new Schema<IQuiz>(
 );
 
 export default mongoose.model<IQuiz>("Quiz", QuizSchema);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// const quiz = new Quiz({
-//   title: "JavaScript Basics",
-//   description: "Test your JS knowledge",
-//   createdBy: teacherId,
-//   shareCode: "abc123",
-//   questions: [
-//     {
-//       text: "What is closure in JS?",
-//       options: ["A function inside another function", "A loop", "An object"],
-//       correctAnswer: 0,
-//     },
-//     {
-//       text: "Which keyword declares a constant?",
-//       options: ["var", "let", "const"],
-//       correctAnswer: 2,
-//     }
-//   ]
-// });
-
-// await quiz.save();

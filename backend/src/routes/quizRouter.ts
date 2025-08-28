@@ -1,84 +1,168 @@
-// routes/quiz.ts
-import express from "express";
 import Quiz from "../Model/QuizModel";
-import { Request, Response } from "express";
+import authenticate from "../Middlewares/auth.middleware";
+import mongoose from "mongoose";
+import { Router, Request, Response } from "express";
 
-const router = express.Router();
+// Extend Express Request type to include full User object
+declare global {
+  namespace Express {
+    interface UserPayload {
+      _id: string;
+      name: string;
+      email: string;
+      role: string;
+    }
 
-/**
- * @route   POST /quiz/create
- * @desc    Teacher creates a new quiz
- */
-router.post("/create", async (req: Request, res: Response) => {
+    interface Request {
+      user?: UserPayload;
+    }
+  }
+}
+
+// Create a new quiz
+const router = Router();
+
+router.post("/create", authenticate, async (req: Request, res: Response) => {
   try {
-    const { title, description, createdBy, questions } = req.body;
+    const { title, description, topic, difficulty, timeLimit, questions } = req.body;
+    const shareCode = Math.random().toString(36).substring(2, 8); // simple random code
 
-    // Generate a unique share code (6-digit alphanumeric)
-    const shareCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+    if (!req.user) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
 
-    const newQuiz = new Quiz({
+    const quiz = new Quiz({
       title,
       description,
-      createdBy,
+      topic,
+      difficulty,
+      timeLimit,
       questions,
+      createdBy: req.user._id, // ✅ now works
       shareCode,
     });
 
-    await newQuiz.save();
-    res.status(201).json(newQuiz);
-  } catch (err) {
-    res.status(500).json({ error: "Server error" });
+    await quiz.save();
+    res.status(201).json({ message: "Quiz created successfully", quiz });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
   }
 });
 
-/**
- * @route   GET /quiz/:id
- * @desc    Fetch a quiz by ID
- */
-router.get("/:id", async (req: Request, res: Response) => {
+// Get quiz by ID
+router.get("/:id", async (req, res) => {
   try {
-    const quiz = await Quiz.findById(req.params.id);
-    if (!quiz) return res.status(404).json({ message: "Quiz not found" });
-    res.json(quiz);
-  } catch (err) {
-    res.status(500).json({ error: "Server error" });
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "Invalid quiz ID" });
+    }
+
+    const quiz = await Quiz.findById(id);
+    if (!quiz) return res.status(404).json({ error: "Quiz not found" });
+
+    res.json({ quiz });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
   }
 });
 
-/**
- * @route   GET /quiz/code/:shareCode
- * @desc    Fetch quiz using shareCode (students use this)
- */
-router.get("/code/:shareCode", async (req: Request, res: Response) => {
+// Get quiz by share code
+router.get("/share/:code", async (req, res) => {
   try {
-    const quiz = await Quiz.findOne({ shareCode: req.params.shareCode });
-    if (!quiz) return res.status(404).json({ message: "Quiz not found" });
-    res.json(quiz);
-  } catch (err) {
-    res.status(500).json({ error: "Server error" });
-  }
-});
+    const { code } = req.params;
+    const quiz = await Quiz.findOne({ shareCode: code });
 
-/**
- * @route   POST /quiz/:id/submit
- * @desc    Student submits answers
- */
-router.post("/:id/submit", async (req: Request, res: Response) => {
-  try {
-    const { answers } = req.body; // array of selected option indexes
-    const quiz = await Quiz.findById(req.params.id);
+    if (!quiz) return res.status(404).json({ error: "Quiz not found" });
 
-    if (!quiz) return res.status(404).json({ message: "Quiz not found" });
-
-    let score = 0;
-    quiz.questions.forEach((q, i) => {
-      if (answers[i] === q.correctAnswer) score++;
-    });
-
-    res.json({ score, total: quiz.questions.length });
-  } catch (err) {
-    res.status(500).json({ error: "Server error" });
+    res.json({ quiz });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
   }
 });
 
 export default router;
+
+// routes/quiz.ts
+// import express from "express";
+// import Quiz from "../Model/QuizModel";
+// import { Request, Response } from "express";
+
+// const router = express.Router();
+
+// /**
+//  * @route   POST /quiz/create
+//  * @desc    Teacher creates a new quiz
+//  */
+// router.post("/create", async (req: Request, res: Response) => {
+//   try {
+//     const { title, description, createdBy, questions } = req.body;
+
+//     // Generate a unique share code (6-digit alphanumeric)
+//     const shareCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+
+//     const newQuiz = new Quiz({
+//       title,
+//       description,
+//       createdBy,
+//       questions,
+//       shareCode,
+//     });
+
+//     await newQuiz.save();
+//     res.status(201).json(newQuiz);
+//   } catch (err) {
+//     res.status(500).json({ error: "Server error" });
+//   }
+// });
+
+// /**
+//  * @route   GET /quiz/:id
+//  * @desc    Fetch a quiz by ID
+//  */
+// router.get("/:id", async (req: Request, res: Response) => {
+//   try {
+//     const quiz = await Quiz.findById(req.params.id);
+//     if (!quiz) return res.status(404).json({ message: "Quiz not found" });
+//     res.json(quiz);
+//   } catch (err) {
+//     res.status(500).json({ error: "Server error" });
+//   }
+// });
+
+// /**
+//  * @route   GET /quiz/code/:shareCode
+//  * @desc    Fetch quiz using shareCode (students use this)
+//  */
+// router.get("/code/:shareCode", async (req: Request, res: Response) => {
+//   try {
+//     const quiz = await Quiz.findOne({ shareCode: req.params.shareCode });
+//     if (!quiz) return res.status(404).json({ message: "Quiz not found" });
+//     res.json(quiz);
+//   } catch (err) {
+//     res.status(500).json({ error: "Server error" });
+//   }
+// });
+
+// /**
+//  * @route   POST /quiz/:id/submit
+//  * @desc    Student submits answers
+//  */
+// router.post("/:id/submit", async (req: Request, res: Response) => {
+//   try {
+//     const { answers } = req.body; // array of selected option indexes
+//     const quiz = await Quiz.findById(req.params.id);
+
+//     if (!quiz) return res.status(404).json({ message: "Quiz not found" });
+
+//     let score = 0;
+//     quiz.questions.forEach((q, i) => {
+//       if (answers[i] === q.correctAnswer) score++;
+//     });
+
+//     res.json({ score, total: quiz.questions.length });
+//   } catch (err) {
+//     res.status(500).json({ error: "Server error" });
+//   }
+// });
+
+// export default router;

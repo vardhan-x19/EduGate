@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Brain, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import Layout from "@/components/layout/Layout";
 import axios from "axios";
-import { login } from "../store/userLogin";
+import { login } from "../store/user";
 import { useDispatch } from "react-redux";
 const Login = () => {
    const dispatch = useDispatch();
@@ -31,7 +31,8 @@ const Login = () => {
       console.log("✅ Login success:", response.data.user);
       dispatch(login({ token: response.data.token, user: response.data.user }));
       localStorage.setItem("quiztoken", response.data.token);
-      navigate("/dashboard"); // Redirect to dashboard on success
+      navigate("/"); // Redirect to dashboard on success
+      // window.location.reload();
     } catch (error: any) {
       console.error("❌ Login failed:", error.response?.data || error.message);
     } finally {

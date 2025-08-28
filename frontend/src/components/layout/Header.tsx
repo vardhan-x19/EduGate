@@ -4,7 +4,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Brain, User, Trophy } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
-import { logout } from "../../store/userLogin";
+import { logout } from "../../store/user";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);

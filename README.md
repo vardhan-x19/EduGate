@@ -96,13 +96,8 @@ JWT_SECRET=your_jwt_secret
 
 ---
 
-## License
-MIT
-# QuizApp Backend API
 
-# QuizApp Backend API
-
-## Workflow
+## User Workflow
 
 1. **User Registration**
   - Users register via `/users/register` with their name, email (must end with `@tkrcet.com`), role (teacher/student), and password.

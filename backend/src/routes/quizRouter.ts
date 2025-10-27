@@ -49,6 +49,18 @@ router.post("/create", authenticate, async (req: Request, res: Response) => {
   }
 });
 
+//to get the all quizzes in the quizzes page
+router.get("/all", async (req: Request, res: Response) => {
+  try {
+    // console.log('get the requ to backend all quizzes')
+    const quizzes = await Quiz.find();
+    console.log(quizzes);
+    res.json({ quizzes });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Get quiz by ID
 router.get("/:id", async (req, res) => {
   try {

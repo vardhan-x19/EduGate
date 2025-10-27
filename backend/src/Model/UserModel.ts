@@ -9,7 +9,7 @@ export interface IUser extends Document {
   role: "teacher" | "student";
   password: string;
   createdAt: Date;
-
+  
   comparePassword(candidatePassword: string): Promise<boolean>;
   generateAuthToken(): string;
 }

@@ -5,8 +5,8 @@ const dbConnection = async (): Promise<void> => {
     await mongoose.connect(process.env.MONGO_URL as string, {
       // these options are no longer required in newer mongoose versions,
       // but adding them won’t break anything
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
+      // useNewUrlParser: true,
+      // useUnifiedTopology: true,
     } as any);
 
     console.log("Connected to MongoDB");

@@ -24,6 +24,7 @@ const Signup = () => {
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     axios.post("http://localhost:5000/users/register", formData)

@@ -2,6 +2,7 @@ import Quiz from "../Model/QuizModel";
 import authenticate from "../Middlewares/auth.middleware";
 import mongoose from "mongoose";
 import { Router, Request, Response } from "express";
+import { generateQuizController } from "../Controllers/controller";
 
 // Extend Express Request type to include full User object
 declare global {
@@ -38,7 +39,7 @@ router.post("/create", authenticate, async (req: Request, res: Response) => {
       difficulty,
       timeLimit,
       questions,
-      createdBy: req.user._id, // ✅ now works
+      createdBy: req.user._id,
       shareCode,
     });
 
@@ -79,6 +80,8 @@ router.get("/share/:code", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+router.post("/create/ai", generateQuizController)
 
 export default router;
 

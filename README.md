@@ -1,8 +1,103 @@
-
-
-# QuizApp Backend API
+# Quiz API Endpoints
 
 ## Workflow
+
+1. **Quiz Creation**
+   - Teachers create quizzes via `/quizzes/create` (POST, authenticated).
+   - Each quiz contains a title, description, topic, difficulty, time limit, questions, and a unique share code.
+
+2. **Quiz Retrieval**
+   - Quizzes can be fetched by their MongoDB ID (`/quizzes/:id`) or by share code (`/quizzes/share/:code`).
+
+---
+
+## Endpoints
+
+### Create Quiz
+- **URL:** `/quizzes/create`
+- **Method:** `POST`
+- **Headers:**
+  - Requires authentication (JWT token)
+- **Body:**
+  ```json
+  {
+    "title": "Quiz Title",
+    "description": "Quiz Description",
+    "topic": "Math",
+    "difficulty": "Beginner" | "Intermediate" | "Advanced",
+    "timeLimit": 30,
+    "questions": [
+      {
+        "questionText": "What is 2+2?",
+        "options": ["3", "4", "5", "6"],
+        "correctAnswer": 1
+      }
+    ]
+  }
+  ```
+- **Response:**
+  - Returns the created quiz object and share code.
+
+---
+
+### Get Quiz by ID
+- **URL:** `/quizzes/:id`
+- **Method:** `GET`
+- **Response:**
+  - Returns the quiz object for the given ID.
+
+---
+
+### Get Quiz by Share Code
+- **URL:** `/quizzes/share/:code`
+- **Method:** `GET`
+- **Response:**
+  - Returns the quiz object for the given share code.
+
+---
+
+## Quiz Model Structure
+
+```typescript
+export interface IQuestion {
+  questionText: string;
+  options: string[];
+  correctAnswer: number; // index of correct option
+}
+
+export interface IQuiz extends Document {
+  title: string;
+  description?: string;
+  topic?: string;
+  difficulty?: "Beginner" | "Intermediate" | "Advanced";
+  timeLimit?: number; // in minutes
+  createdBy: mongoose.Types.ObjectId;
+  questions: IQuestion[];
+  shareCode: string;
+  createdAt: Date;
+}
+```
+
+---
+
+## Example Environment Variables
+```
+MONGO_URL=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+```
+
+---
+
+## Getting Started
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Set up your `.env` file
+4. Start the server: `npm run dev`
+
+---
+
+
+## User Workflow
 
 1. **User Registration**
   - Users register via `/users/register` with their name, email (must end with `@tkrcet.com`), role (teacher/student), and password.

@@ -52,13 +52,16 @@ router.get("/all", async (req: Request, res: Response) => {
 
 router.post("/create", authenticate, async (req: Request, res: Response) => {
   try {
-    const { title, description, topic, difficulty, timeLimit, questions,creator,participants,icons,isPrivate } = req.body;
+    const { title, description, topic, difficulty, timeLimit,creator,participants,icons,isPrivate } = req.body.quizSettings;
+    const questions = req.body.questions;
     const shareCode = Math.random().toString(36).substring(2, 8); // simple random code
-
+    console.log("que", req.body.questions)
     if (!req.user) {
       return res.status(401).json({ error: "Unauthorized" });
     }
-
+    if (req.user) {
+      console.log(req.user)
+    }
     const quiz = new Quiz({
       title,
       description,
@@ -66,17 +69,17 @@ router.post("/create", authenticate, async (req: Request, res: Response) => {
       difficulty,
       timeLimit,
       questions,
-      createdBy: req.user._id, // ✅ now works
       shareCode,
       creator,
       participants,
       icons,
       isPrivate
     });
-
+    
     await quiz.save();
     res.status(201).json({ message: "Quiz created successfully", quiz });
   } catch (err: any) {
+    console.log(err)
     res.status(500).json({ error: err.message });
   }
 });

@@ -17,6 +17,10 @@ const quizSchema = {
       items: {
         type: Type.OBJECT,
         properties: {
+          queNum: {
+            type: Type.INTEGER,
+            description: "The question number in the quiz",
+          },
           questionText: {
             type: Type.STRING,
             description: "The text of the question.",
@@ -28,21 +32,23 @@ const quizSchema = {
               type: Type.STRING,
             },
           },
-          correctAnswerIndex: {
+          correctAnswer: {
             type: Type.INTEGER,
-            description: "The 0-based index of the correct answer in the options array.",
+            description:
+              "The 0-based index of the correct answer in the options array.",
           },
         },
-        required: ["questionText", "options", "correctAnswerIndex"],
+        required: ["questionText", "options", "correctAnswer"],
       },
     },
   },
   required: ["questions"],
 };
 
-const generateQuiz = async (topic: string, numberOfQuestions: number) => {
+
+const generateQuiz = async (topic: string, numberOfQuestions: number, difficulty: string) => {
   try {
-    const prompt = `Generate a multiple-choice quiz about "${topic}" with exactly ${numberOfQuestions} questions. Each question must have 4 options. Ensure the correct answer index is accurate.`;
+    const prompt = `Generate a multiple-choice quiz about "${topic}" with exactly ${numberOfQuestions} questions. Each question must have 4 options. Ensure the correct answer index is accurate. The difficulty level is ${difficulty}.`;
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
       contents: prompt,
@@ -63,3 +69,5 @@ const generateQuiz = async (topic: string, numberOfQuestions: number) => {
 }
 
 export default generateQuiz;
+
+

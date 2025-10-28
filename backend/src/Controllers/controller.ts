@@ -3,13 +3,13 @@ import generateQuiz from "../services/ai.services"
 
 export const aiGenerateQuiz = async (req: Request, res: Response) => {
     try {
-        const { topic, numberOfQuestions } = req.body;
-        if (!topic || !numberOfQuestions) {
+        const { topic, numberOfQuestions, difficulty } = req.body;
+        if (!topic || !numberOfQuestions || !difficulty) {
             return res.status(400).json({
-                message: "Topic and Number of Questions are required"
+                message: "Topic, Number of Questions and Difficulty are required"
             });
         }
-        const quiz = await generateQuiz(topic, numberOfQuestions);
+        const quiz = await generateQuiz(topic, numberOfQuestions, difficulty);
         return res.status(200).json({
             success:true,
             result:quiz

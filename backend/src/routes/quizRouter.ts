@@ -92,6 +92,7 @@ router.post("/create", authenticate, async (req: Request, res: Response) => {
 router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
+    console.log("id",id)
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ error: "Invalid quiz ID" });
     }

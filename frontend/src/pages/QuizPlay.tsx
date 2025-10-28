@@ -27,8 +27,8 @@ import {
 } from "@/components/ui/alert-dialog";
 
 interface Question {
-  id: string;
-  question: string;
+  queNum: number;
+  questionText: string;
   options: string[];
   correctAnswer: number;
   explanation?: string;
@@ -52,8 +52,8 @@ const QuizPlay = () => {
     timeLimit: 15,
     questions: [
       {
-        id: "1",
-        question: "What is the correct way to declare a variable in JavaScript that cannot be reassigned?",
+        queNum: 1,
+        questionText: "What is the correct way to declare a variable in JavaScript that cannot be reassigned?",
         options: [
           "var myVariable = 'value';",
           "let myVariable = 'value';",
@@ -64,8 +64,8 @@ const QuizPlay = () => {
         explanation: "The 'const' keyword is used to declare variables that cannot be reassigned after initialization."
       },
       {
-        id: "2",
-        question: "Which method is used to add an element to the end of an array?",
+        queNum: 2,
+        questionText: "Which method is used to add an element to the end of an array?",
         options: [
           "array.add()",
           "array.push()",
@@ -76,8 +76,8 @@ const QuizPlay = () => {
         explanation: "The push() method adds one or more elements to the end of an array and returns the new length."
       },
       {
-        id: "3",
-        question: "What does the '===' operator do in JavaScript?",
+        queNum: 3,
+        questionText: "What does the '===' operator do in JavaScript?",
         options: [
           "Assigns a value to a variable",
           "Compares values only",
@@ -88,8 +88,8 @@ const QuizPlay = () => {
         explanation: "The === operator checks for strict equality, comparing both value and type."
       },
       {
-        id: "4",
-        question: "Which of the following is NOT a JavaScript data type?",
+        queNum: 4,
+        questionText: "Which of the following is NOT a JavaScript data type?",
         options: [
           "String",
           "Boolean",
@@ -100,8 +100,8 @@ const QuizPlay = () => {
         explanation: "JavaScript uses 'Number' for all numeric values. 'Float' is not a separate data type."
       },
       {
-        id: "5",
-        question: "What will 'typeof null' return in JavaScript?",
+        queNum: 5,
+        questionText: "What will 'typeof null' return in JavaScript?",
         options: [
           "'null'",
           "'undefined'",
@@ -259,7 +259,7 @@ const QuizPlay = () => {
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <CardTitle className="text-2xl pr-4">
-                    {currentQuestion.question}
+                    {currentQuestion.questionText}
                   </CardTitle>
                   <Button
                     variant={flaggedQuestions.has(currentQuestionIndex) ? "destructive" : "outline"}

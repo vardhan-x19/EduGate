@@ -51,7 +51,7 @@ router.post("/register", async (req: Request, res: Response) => {
 router.post("/login", async (req: Request, res: Response) => {
   try {
     // console.log("Login route accessed", req.body);
-    console.log("Login attempt:", req.body);
+    // console.log("Login attempt:", req.body);
     const { email, password } = req.body;
     // console.log("Login attempt:", { email, password });
     // check if user exists

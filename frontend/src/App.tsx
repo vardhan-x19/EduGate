@@ -116,10 +116,9 @@ const App = () => {
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          {/* Show Navbar only when logged in */}
-          {/* {isLogin && <Navbar />} */}
+        
           <Routes>
-            {/* Only show Login and Signup when not logged in */}
+
             {!isLogin ? (
               <>
                 <Route path="/" element={<Login />} />

@@ -11,8 +11,11 @@ export interface IQuiz extends Document {
   description?: string;
   topic?: string;
   difficulty?: "Beginner" | "Intermediate" | "Advanced";
-  timeLimit?: number; // in minutes
-  createdBy: mongoose.Types.ObjectId;
+  timeLimit?: number;
+  participants: number;
+  icon?: string;
+  isPrivate: boolean;
+  creator: string; // using normal string as you sent
   questions: IQuestion[];
   shareCode: string;
   createdAt: Date;
@@ -30,8 +33,11 @@ const QuizSchema = new Schema<IQuiz>(
     description: { type: String },
     topic: { type: String },
     difficulty: { type: String, enum: ["Beginner", "Intermediate", "Advanced"] },
-    timeLimit: { type: Number }, // minutes
-    createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    timeLimit: { type: Number },
+    participants: { type: Number, default: 0 },
+    icon: { type: String },
+    isPrivate: { type: Boolean, default: false },
+    creator: { type: String, required: false }, // keeping string as per your JSON
     questions: { type: [QuestionSchema], default: [] },
     shareCode: { type: String, required: true, unique: true },
   },

@@ -7,7 +7,7 @@ dotenv.config();
 
 const authenticate = async (req: Request, res: Response, next: NextFunction) => {
   const JWT_SECRET : string = process.env.JWT_SECRET as string;
-  console.log('JWT_SECRET:',JWT_SECRET);
+  // console.log('JWT_SECRET:',JWT_SECRET);
   let token: string | undefined;
 
   // Check for Bearer token in Authorization header
@@ -20,17 +20,17 @@ const authenticate = async (req: Request, res: Response, next: NextFunction) => 
   if (!token && req.cookies && req.cookies.token) {
     token = req.cookies.token;
   }
-  console.log('Token:',token); 
+  // console.log('Token:',token); 
   if (!token) {
     return res.status(401).json({ message: 'Authentication token missing' });
   }
 
   try {
     const decoded :any = jwt.verify(token, JWT_SECRET as string);
-    console.log('Decoded JWT:', decoded,decoded.id);
+    // console.log('Decoded JWT:', decoded,decoded.id);
     // Attach user info to request object if needed
     const user = await userModel.findById(decoded.id);
-    console.log('Authenticated user:', user);
+    // console.log('Authenticated user:', user);
     if (!user) {
       // console.log('!user');
       return res.status(401).json({ message: 'Unauthorized' });

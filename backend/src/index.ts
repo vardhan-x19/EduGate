@@ -6,14 +6,18 @@ import userRouter from "./routes/userRouter";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import quizRouter from "./routes/quizRouter";
+
+
 const app = express();
 const PORT = process.env.PORT || 5000;
+
 dotenv.config();
 dbConnection();
 
 app.use(morgan("dev"));
 
 app.use(express.urlencoded({ extended: true }));
+
 app.use(cors({
   origin: "http://localhost:8080", // or your frontend domain
   credentials: true
@@ -21,9 +25,11 @@ app.use(cors({
 
 app.use(express.json());
 app.use(cookieParser());
+
 app.get("/", (req: Request, res: Response) => {
   res.send("🚀 Backend with TypeScript is running!");
 });
+
 app.use("/users", userRouter);
 app.use("/quiz", quizRouter);
 

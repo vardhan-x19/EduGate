@@ -37,7 +37,7 @@ const QuizSchema = new Schema<IQuiz>(
     participants: { type: Number, default: 0 },
     icon: { type: String },
     isPrivate: { type: Boolean, default: false },
-    creator: { type: String, required: false }, // keeping string as per your JSON
+    creator: { type: String, required: true }, // keeping string as per your JSON
     questions: { type: [QuestionSchema], default: [] },
     shareCode: { type: String, required: true, unique: true },
   },

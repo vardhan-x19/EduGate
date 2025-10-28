@@ -3,9 +3,10 @@ import cors from "cors";
 import dotenv from "dotenv";
 import dbConnection from "./DB/db";
 import userRouter from "./routes/userRouter";
+import quizRouter from "./routes/quizRouter";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
-import quizRouter from "./routes/quizRouter";
+// import quizRouter from "./routes/quizRouter";
 
 
 const app = express();
@@ -31,6 +32,7 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.use("/users", userRouter);
+app.use("/quiz", quizRouter);
 app.use("/quiz", quizRouter);
 
 app.listen(PORT, () => {

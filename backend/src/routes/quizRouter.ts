@@ -23,15 +23,46 @@ declare global {
 // Create a new quiz
 const router = Router();
 
+// Get all quizzes (used by frontend list page)
+router.get("/all", async (req: Request, res: Response) => {
+  try {
+    const quizzes = await Quiz.find().lean();
+    // normalize fields expected by frontend (id, participants, creator, icon, isPrivate)
+    const normalized = quizzes.map((q: any) => ({
+      id: String(q._id),
+      title: q.title,
+      description: q.description || "",
+      topic: q.topic || "",
+      difficulty: q.difficulty || "",
+      timeLimit: q.timeLimit || 0,
+      questions: q.questions || [],
+      participants: q.participants ?? 0,
+      // model uses `creator` as string; fall back to createdBy if present
+      creator: q.creator || q.createdBy || "",
+      shareCode: q.shareCode,
+      // keep icon if provided (string name), frontend will map string to component
+      icon: q.icon || undefined,
+      isPrivate: q.isPrivate || false,
+    }));
+
+    res.json({ quizzes: normalized });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 router.post("/create", authenticate, async (req: Request, res: Response) => {
   try {
-    const { title, description, topic, difficulty, timeLimit, questions } = req.body;
+    const { title, description, topic, difficulty, timeLimit,creator,participants,icons,isPrivate } = req.body.quizSettings;
+    const questions = req.body.questions;
     const shareCode = Math.random().toString(36).substring(2, 8); // simple random code
-
+    console.log("que", req.body.questions)
     if (!req.user) {
       return res.status(401).json({ error: "Unauthorized" });
     }
-
+    if (req.user) {
+      console.log(req.user)
+    }
     const quiz = new Quiz({
       title,
       description,
@@ -41,26 +72,21 @@ router.post("/create", authenticate, async (req: Request, res: Response) => {
       questions,
       createdBy: req.user._id,
       shareCode,
+      creator,
+      participants,
+      icons,
+      isPrivate
     });
-
+    
     await quiz.save();
     res.status(201).json({ message: "Quiz created successfully", quiz });
   } catch (err: any) {
+    console.log(err)
     res.status(500).json({ error: err.message });
   }
 });
 
-//to get the all quizzes in the quizzes page
-router.get("/all", async (req: Request, res: Response) => {
-  try {
-    // console.log('get the requ to backend all quizzes')
-    const quizzes = await Quiz.find();
-    console.log(quizzes);
-    res.json({ quizzes });
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
-  }
-});
+// Note: single /all route above returns normalized quizzes for the frontend
 
 // Get quiz by ID
 router.get("/:id", async (req, res) => {

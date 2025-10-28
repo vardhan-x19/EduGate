@@ -88,60 +88,8 @@ const Quiz = () => {
   //     icon: Code,
   //     isPrivate: false,
   //     creator: "React Masters"
-  //   },
-  //   {
-  //     id: "3",
-  //     title: "World Geography Challenge",
-  //     description: "Explore countries, capitals, and geographical features from around the world.",
-  //     topic: "Geography",
-  //     difficulty: "Intermediate",
-  //     timeLimit: 20,
-  //     questions: 30,
-  //     participants: 2156,
-  //     icon: Globe,
-  //     isPrivate: false,
-  //     creator: "GeoQuiz Pro"
-  //   },
-  //   {
-  //     id: "4",
-  //     title: "Art History Renaissance",
-  //     description: "Journey through the Renaissance period and its influential artists and masterpieces.",
-  //     topic: "Art",
-  //     difficulty: "Intermediate",
-  //     timeLimit: 18,
-  //     questions: 25,
-  //     participants: 654,
-  //     icon: Palette,
-  //     isPrivate: false,
-  //     creator: "Art Historians"
-  //   },
-  //   {
-  //     id: "5",
-  //     title: "Advanced Mathematics",
-  //     description: "Calculus, linear algebra, and advanced mathematical concepts.",
-  //     topic: "Mathematics",
-  //     difficulty: "Advanced",
-  //     timeLimit: 30,
-  //     questions: 20,
-  //     participants: 432,
-  //     icon: BookOpen,
-  //     isPrivate: true,
-  //     creator: "Math Academy"
-  //   },
-  //   {
-  //     id: "6",
-  //     title: "AI & Machine Learning Basics",
-  //     description: "Introduction to artificial intelligence and machine learning concepts.",
-  //     topic: "Technology",
-  //     difficulty: "Beginner",
-  //     timeLimit: 22,
-  //     questions: 18,
-  //     participants: 1876,
-  //     icon: Brain,
-  //     isPrivate: false,
-  //     creator: "AI Learning Hub"
   //   }
-  // ];
+  // ]
   console.log("quizzes",quizzes, typeof(quizzes))
 
   const topics = [
@@ -155,10 +103,12 @@ const Quiz = () => {
   const difficulties = ["all", "Beginner", "Intermediate", "Advanced"];
   var filteredQuizzes=[];
   if (quizzes) {
-    filteredQuizzes = quizzes.filter((quiz) => {
+    filteredQuizzes = quizzes.filter((quiz: any) => {
+      const title = (quiz.title || "").toString();
+      const desc = (quiz.description || "").toString();
       const matchesSearch =
-        quiz.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        quiz.description.toLowerCase().includes(searchTerm.toLowerCase());
+        title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        desc.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesTopic =
         selectedTopic === "all" || quiz.topic === selectedTopic;
       const matchesDifficulty =
@@ -167,6 +117,15 @@ const Quiz = () => {
       return matchesSearch && matchesTopic && matchesDifficulty;
     });
   }
+
+  // map of icon name (string) to React component
+  const iconMap: Record<string, any> = {
+    Code,
+    Globe,
+    Palette,
+    BookOpen,
+    Brain,
+  };
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -182,8 +141,7 @@ const Quiz = () => {
   };
 
   return (
-    <>
-    {isLoading? (<h1>hello </h1>) : (<Layout>
+    <Layout>
       <div className="container py-8">
         {/* Header */}
         <motion.div
@@ -264,74 +222,78 @@ const Quiz = () => {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
         >
-          {filteredQuizzes.map((quiz, index) => (
-            <motion.div
-              key={quiz.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-            >
-              <Card className="h-full hover-lift bg-gradient-card border-0 shadow-md group">
-                <CardHeader className="pb-4">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-primary">
-                      <quiz.icon className="h-6 w-6 text-white" />
+          {filteredQuizzes.map((quiz: any, index: number) => {
+            const key = quiz.id || quiz._id || index;
+            const IconComponent = quiz.icon && iconMap[quiz.icon] ? iconMap[quiz.icon] : Code;
+            return (
+              <motion.div
+                key={key}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+              >
+                <Card className="h-full hover-lift bg-gradient-card border-0 shadow-md group">
+                  <CardHeader className="pb-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-primary">
+                        <IconComponent className="h-6 w-6 text-white" />
+                      </div>
+                      {quiz.isPrivate && (
+                        <Badge variant="outline" className="gap-1">
+                          <Lock className="h-3 w-3" />
+                          Private
+                        </Badge>
+                      )}
                     </div>
-                    {quiz.isPrivate && (
-                      <Badge variant="outline" className="gap-1">
-                        <Lock className="h-3 w-3" />
-                        Private
+                    <CardTitle className="text-lg line-clamp-2">
+                      {quiz.title}
+                    </CardTitle>
+                    <CardDescription className="line-clamp-3">
+                      {quiz.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex flex-wrap gap-2">
+                      <Badge variant="secondary">{quiz.topic}</Badge>
+                      <Badge className={getDifficultyColor(quiz.difficulty)}>
+                        {quiz.difficulty}
                       </Badge>
-                    )}
-                  </div>
-                  <CardTitle className="text-lg line-clamp-2">
-                    {quiz.title}
-                  </CardTitle>
-                  <CardDescription className="line-clamp-3">
-                    {quiz.description}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex flex-wrap gap-2">
-                    <Badge variant="secondary">{quiz.topic}</Badge>
-                    <Badge className={getDifficultyColor(quiz.difficulty)}>
-                      {quiz.difficulty}
-                    </Badge>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-4 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <Clock className="h-4 w-4" />
-                      <span>{quiz.timeLimit}m</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Brain className="h-4 w-4" />
-                      <span>{quiz.questions.length}q</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Users className="h-4 w-4" />
-                      <span>{quiz.participants.toLocaleString()}</span>
-                    </div>
-                  </div>
 
-                  <div className="text-xs text-muted-foreground">
-                    Created by {quiz.creator}
-                  </div>
+                    <div className="grid grid-cols-3 gap-4 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-4 w-4" />
+                        <span>{quiz.timeLimit ?? 0}m</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Brain className="h-4 w-4" />
+                        <span>{(quiz.questions?.length ?? 0)}q</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Users className="h-4 w-4" />
+                        <span>{(quiz.participants ?? 0).toLocaleString()}</span>
+                      </div>
+                    </div>
 
-                  <Button
-                    className="w-full group-hover:shadow-glow transition-all duration-300"
-                    variant={quiz.isPrivate ? "outline" : "gradient"}
-                    asChild
-                  >
-                    <Link to={`/quiz/${quiz.id}/play`}>
-                      <Play className="h-4 w-4 mr-2" />
-                      {quiz.isPrivate ? "Enter Code" : "Start Quiz"}
-                    </Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
+                    <div className="text-xs text-muted-foreground">
+                      Created by {quiz.creator || 'Unknown'}
+                    </div>
+
+                    <Button
+                      className="w-full group-hover:shadow-glow transition-all duration-300"
+                      variant={quiz.isPrivate ? "outline" : "gradient"}
+                      asChild
+                    >
+                      <Link to={`/quiz/${quiz.id || quiz._id}/play`}>
+                        <Play className="h-4 w-4 mr-2" />
+                        {quiz.isPrivate ? "Enter Code" : "Start Quiz"}
+                      </Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            );
+          })}
         </motion.div>
 
         {/* No Results */}
@@ -378,8 +340,8 @@ const Quiz = () => {
           </Card>
         </motion.div>
       </div>
-    </Layout>) }
-    </>
+    </Layout>
+  
     
   );
 };

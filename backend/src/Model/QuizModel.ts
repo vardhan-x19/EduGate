@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IQuestion {
+  queNum: number;
   questionText: string;
   options: string[];
   correctAnswer: number; // index of correct option
@@ -10,7 +11,7 @@ export interface IQuiz extends Document {
   title: string;
   description?: string;
   topic?: string;
-  difficulty?: "Beginner" | "Intermediate" | "Advanced";
+  difficulty?: "beginner" | "intermediate" | "advanced";
   timeLimit?: number;
   participants: number;
   icon?: string;
@@ -22,6 +23,7 @@ export interface IQuiz extends Document {
 }
 
 const QuestionSchema = new Schema<IQuestion>({
+  queNum: { type: Number, required: true },
   questionText: { type: String, required: true },
   options: { type: [String], required: true },
   correctAnswer: { type: Number, required: true },
@@ -32,12 +34,12 @@ const QuizSchema = new Schema<IQuiz>(
     title: { type: String, required: true },
     description: { type: String },
     topic: { type: String },
-    difficulty: { type: String, enum: ["Beginner", "Intermediate", "Advanced"] },
+    difficulty: { type: String, enum: ["beginner", "intermediate", "advanced"] },
     timeLimit: { type: Number },
     participants: { type: Number, default: 0 },
     icon: { type: String },
     isPrivate: { type: Boolean, default: false },
-    creator: { type: String, required: false }, // keeping string as per your JSON
+    creator: { type: String, required: true }, // keeping string as per your JSON
     questions: { type: [QuestionSchema], default: [] },
     shareCode: { type: String, required: true, unique: true },
   },

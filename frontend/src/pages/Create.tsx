@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import axios from "axios";
 import { 
   Brain, 
   Plus, 
@@ -28,13 +29,13 @@ const Create = () => {
   const [activeTab, setActiveTab] = useState("ai");
   const [questions, setQuestions] = useState([
     {
-      id: 1,
-      text: "",
+      queNum: 1,
+      questionText: "",
       options: ["", "", "", ""],
       correctAnswer: 0
     }
   ]);
-
+  console.log("questions", questions);
   const [quizSettings, setQuizSettings] = useState({
     title: "",
     description: "",
@@ -42,10 +43,16 @@ const Create = () => {
     difficulty: "beginner",
     timeLimit: 15,
     isPublic: true,
+    questions: questions,
     tabSwitchDetection: false,
-    cameraProctoring: false
+    cameraProctoring: false,
+    creator: "teacher",
+    participants: 0,
+    icons: "default",
+    isPrivate: false
   });
-
+  console.log("quizSettings", quizSettings);
+  
   const [aiSettings, setAiSettings] = useState({
     topic: "",
     difficulty: "beginner",
@@ -55,32 +62,54 @@ const Create = () => {
 
   const addQuestion = () => {
     const newQuestion = {
-      id: questions.length + 1,
-      text: "",
+      queNum: questions.length + 1,
+      questionText: "",
       options: ["", "", "", ""],
       correctAnswer: 0
     };
     setQuestions([...questions, newQuestion]);
+    setQuizSettings(prev => ({ ...prev, questions: [...questions, newQuestion] }));
   };
 
-  const removeQuestion = (id: number) => {
-    setQuestions(questions.filter(q => q.id !== id));
+  const removeQuestion = (queNum: number) => {
+    setQuestions(questions.filter(q => q.queNum !== queNum));
   };
 
-  const updateQuestion = (id: number, field: string, value: any) => {
+  const updateQuestion = (queNum: number, field: string, value: any) => {
     setQuestions(questions.map(q => 
-      q.id === id ? { ...q, [field]: value } : q
+      q.queNum === queNum ? { ...q, [field]: value } : q
     ));
   };
 
   const updateQuestionOption = (questionId: number, optionIndex: number, value: string) => {
     setQuestions(questions.map(q => 
-      q.id === questionId 
+      q.queNum === questionId 
         ? { ...q, options: q.options.map((opt, idx) => idx === optionIndex ? value : opt) }
         : q
     ));
   };
 
+  const createQuiz = () => {
+    const token = localStorage.getItem("quiztoken");
+    console.log("quizSettings",quizSettings)
+    axios.post(
+      "http://localhost:5000/quiz/create",
+      { quizSettings, questions },
+      {
+      headers: {
+        Authorization: token ? `Bearer ${token}` : "",
+        "Content-Type": "application/json"
+      }
+      }
+    )
+    .then(response => {
+      console.log("Quiz created successfully:", response.data);
+    })
+    .catch(error => {
+      console.error("Error creating quiz:", error);
+    });
+    console.log("Creating quiz with settings:", quizSettings);
+  }
   return (
     <Layout>
       <div className="container py-8 max-w-4xl">
@@ -286,7 +315,7 @@ const Create = () => {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   {questions.map((question, index) => (
-                    <div key={question.id} className="border rounded-lg p-4 space-y-4">
+                    <div key={question.queNum} className="border rounded-lg p-4 space-y-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <GripVertical className="h-4 w-4 text-muted-foreground" />
@@ -296,7 +325,7 @@ const Create = () => {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => removeQuestion(question.id)}
+                            onClick={() => removeQuestion(question.queNum)}
                             className="text-destructive hover:text-destructive"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -308,8 +337,8 @@ const Create = () => {
                         <Label>Question</Label>
                         <Textarea
                           placeholder="Enter your question"
-                          value={question.text}
-                          onChange={(e) => updateQuestion(question.id, 'text', e.target.value)}
+                          value={question.questionText}
+                          onChange={(e) => updateQuestion(question.queNum, 'questionText', e.target.value)}
                         />
                       </div>
 
@@ -320,9 +349,9 @@ const Create = () => {
                             <div className="flex items-center space-x-2">
                               <input
                                 type="radio"
-                                name={`correct-${question.id}`}
+                                name={`correct-${question.queNum}`}
                                 checked={question.correctAnswer === optionIndex}
-                                onChange={() => updateQuestion(question.id, 'correctAnswer', optionIndex)}
+                                onChange={() => updateQuestion(question.queNum, 'correctAnswer', optionIndex)}
                                 className="text-primary"
                               />
                               <Label className="text-sm">Correct</Label>
@@ -330,7 +359,7 @@ const Create = () => {
                             <Input
                               placeholder={`Option ${String.fromCharCode(65 + optionIndex)}`}
                               value={option}
-                              onChange={(e) => updateQuestionOption(question.id, optionIndex, e.target.value)}
+                              onChange={(e) => updateQuestionOption(question.queNum, optionIndex, e.target.value)}
                               className="flex-1"
                             />
                           </div>
@@ -402,7 +431,7 @@ const Create = () => {
                   <Eye className="h-5 w-5 mr-2" />
                   Preview Quiz
                 </Button>
-                <Button variant="gradient" size="lg" className="flex-1">
+                <Button onClick={createQuiz} variant="gradient" size="lg" className="flex-1">
                   <Share2 className="h-5 w-5 mr-2" />
                   Publish Quiz
                 </Button>

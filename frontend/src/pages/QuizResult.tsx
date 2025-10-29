@@ -24,7 +24,8 @@ const QuizResults = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+
+
   const {
     score,
     correctCount,

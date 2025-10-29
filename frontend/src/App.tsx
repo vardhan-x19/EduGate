@@ -90,6 +90,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { login } from "./store/user";
 import axios from "axios";
 import QuizPlay from "./pages/QuizPlay";
+import QuizResults from "./pages/QuizResult";
 // import Navbar from "./components/Navbar"; // Assuming you have a Navbar component
 
 const App = () => {
@@ -136,7 +137,8 @@ const App = () => {
                 <Route path="/create" element={<Create />} />
                 <Route path="/leaderboard" element={<Leaderboard />} />
                 <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/quiz/:id/play" element={<QuizPlay />} />
+                <Route path="/quiz/:quizId/play" element={<QuizPlay />} />
+                <Route path="/quiz/:quizId/results" element={<QuizResults />} />
                 <Route path="*" element={<NotFound />} />
               </>
             )}

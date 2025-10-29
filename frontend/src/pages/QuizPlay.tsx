@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import axios from "axios";
 import { 
   Clock, 
   ChevronRight, 
@@ -39,80 +40,136 @@ const QuizPlay = () => {
   const navigate = useNavigate();
   
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [quizData, setQuizData] = useState<null | any>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, number>>({});
   const [timeRemaining, setTimeRemaining] = useState(900); // 15 minutes in seconds
   const [showSubmitDialog, setShowSubmitDialog] = useState(false);
   const [flaggedQuestions, setFlaggedQuestions] = useState<Set<number>>(new Set());
+  //  const { id } = useParams();
+  console.log("Quiz ID:", quizId);
+  useEffect(() => {
+    if (!quizId) return;
+    setIsLoading(true);
+    axios
+      .get(`http://localhost:5000/quiz/${quizId}`)
+      .then((response) => {
+        // Handle successful response
+        const fetched = response.data?.quiz || response.data;
+        console.log("Quiz data after fetching:", fetched);
+        setQuizData(fetched);
+        // set timer from fetched timeLimit if provided
+        if (fetched?.timeLimit) {
+          setTimeRemaining(Number(fetched.timeLimit) * 60);
+        }
+      })
+      .catch((error) => {
+        // Handle error
+        console.error("Error fetching quiz data:", error);
+      })
+      .finally(() => setIsLoading(false));
+  }, [quizId]);
+
+  // Timer countdown effect must be declared unconditionally (before any early returns)
+  useEffect(() => {
+    if (timeRemaining <= 0) {
+      // don't call handleSubmit directly here; schedule after render
+      // but handleSubmit will be defined by the time this effect runs
+      handleSubmit();
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setTimeRemaining(prev => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [timeRemaining]);
 
   // Mock quiz data
-  const quizData = {
-    id: quizId,
-    title: "JavaScript Fundamentals",
-    description: "Test your knowledge of core JavaScript concepts",
-    timeLimit: 15,
-    questions: [
-      {
-        queNum: 1,
-        questionText: "What is the correct way to declare a variable in JavaScript that cannot be reassigned?",
-        options: [
-          "var myVariable = 'value';",
-          "let myVariable = 'value';",
-          "const myVariable = 'value';",
-          "variable myVariable = 'value';"
-        ],
-        correctAnswer: 2,
-        explanation: "The 'const' keyword is used to declare variables that cannot be reassigned after initialization."
-      },
-      {
-        queNum: 2,
-        questionText: "Which method is used to add an element to the end of an array?",
-        options: [
-          "array.add()",
-          "array.push()",
-          "array.append()",
-          "array.insert()"
-        ],
-        correctAnswer: 1,
-        explanation: "The push() method adds one or more elements to the end of an array and returns the new length."
-      },
-      {
-        queNum: 3,
-        questionText: "What does the '===' operator do in JavaScript?",
-        options: [
-          "Assigns a value to a variable",
-          "Compares values only",
-          "Compares both value and type",
-          "Creates a new variable"
-        ],
-        correctAnswer: 2,
-        explanation: "The === operator checks for strict equality, comparing both value and type."
-      },
-      {
-        queNum: 4,
-        questionText: "Which of the following is NOT a JavaScript data type?",
-        options: [
-          "String",
-          "Boolean",
-          "Float",
-          "Undefined"
-        ],
-        correctAnswer: 2,
-        explanation: "JavaScript uses 'Number' for all numeric values. 'Float' is not a separate data type."
-      },
-      {
-        queNum: 5,
-        questionText: "What will 'typeof null' return in JavaScript?",
-        options: [
-          "'null'",
-          "'undefined'",
-          "'object'",
-          "'number'"
-        ],
-        correctAnswer: 2,
-        explanation: "This is a known quirk in JavaScript - typeof null returns 'object' due to a legacy bug."
-      }
-    ] as Question[]
-  };
+  // const quizData = {
+  //   id: quizId,
+  //   title: "JavaScript Fundamentals",
+  //   description: "Test your knowledge of core JavaScript concepts",
+  //   timeLimit: 15,
+  //   questions: [
+  //     {
+  //       queNum: 1,
+  //       questionText: "What is the correct way to declare a variable in JavaScript that cannot be reassigned?",
+  //       options: [
+  //         "var myVariable = 'value';",
+  //         "let myVariable = 'value';",
+  //         "const myVariable = 'value';",
+  //         "variable myVariable = 'value';"
+  //       ],
+  //       correctAnswer: 2,
+  //       explanation: "The 'const' keyword is used to declare variables that cannot be reassigned after initialization."
+  //     },
+  //     {
+  //       queNum: 2,
+  //       questionText: "Which method is used to add an element to the end of an array?",
+  //       options: [
+  //         "array.add()",
+  //         "array.push()",
+  //         "array.append()",
+  //         "array.insert()"
+  //       ],
+  //       correctAnswer: 1,
+  //       explanation: "The push() method adds one or more elements to the end of an array and returns the new length."
+  //     },
+  //     {
+  //       queNum: 3,
+  //       questionText: "What does the '===' operator do in JavaScript?",
+  //       options: [
+  //         "Assigns a value to a variable",
+  //         "Compares values only",
+  //         "Compares both value and type",
+  //         "Creates a new variable"
+  //       ],
+  //       correctAnswer: 2,
+  //       explanation: "The === operator checks for strict equality, comparing both value and type."
+  //     },
+  //     {
+  //       queNum: 4,
+  //       questionText: "Which of the following is NOT a JavaScript data type?",
+  //       options: [
+  //         "String",
+  //         "Boolean",
+  //         "Float",
+  //         "Undefined"
+  //       ],
+  //       correctAnswer: 2,
+  //       explanation: "JavaScript uses 'Number' for all numeric values. 'Float' is not a separate data type."
+  //     },
+  //     {
+  //       queNum: 5,
+  //       questionText: "What will 'typeof null' return in JavaScript?",
+  //       options: [
+  //         "'null'",
+  //         "'undefined'",
+  //         "'object'",
+  //         "'number'"
+  //       ],
+  //       correctAnswer: 2,
+  //       explanation: "This is a known quirk in JavaScript - typeof null returns 'object' due to a legacy bug."
+  //     }
+  //   ] as Question[]
+  // };
+  if (isLoading) {
+    return (
+      <Layout showFooter={false}>
+        <div className="container py-8 text-center">Loading quiz…</div>
+      </Layout>
+    );
+  }
+
+  if (!quizData || !Array.isArray(quizData.questions) || quizData.questions.length === 0) {
+    return (
+      <Layout showFooter={false}>
+        <div className="container py-8 text-center">No questions found for this quiz.</div>
+      </Layout>
+    );
+  }
 
   const totalQuestions = quizData.questions.length;
   const currentQuestion = quizData.questions[currentQuestionIndex];
@@ -124,20 +181,6 @@ const QuizPlay = () => {
     navigate('/quiz');
     return null;
   }
-
-  // Timer countdown
-  useEffect(() => {
-    if (timeRemaining <= 0) {
-      handleSubmit();
-      return;
-    }
-
-    const timer = setInterval(() => {
-      setTimeRemaining(prev => prev - 1);
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [timeRemaining]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -179,7 +222,7 @@ const QuizPlay = () => {
   const handleSubmit = () => {
     // Calculate score and navigate to results
     let correctCount = 0;
-    quizData.questions.forEach((question, index) => {
+    quizData.questions.forEach((question: any, index: number) => {
       if (selectedAnswers[index] === question.correctAnswer) {
         correctCount++;
       }
@@ -200,6 +243,9 @@ const QuizPlay = () => {
       }
     });
   };
+
+  // Timer countdown
+  // (moved earlier to keep hook order stable)
 
   const getTimeColor = () => {
     if (timeRemaining > 300) return "text-foreground";

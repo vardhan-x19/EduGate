@@ -33,7 +33,6 @@ app.get("/", (req: Request, res: Response) => {
 
 app.use("/users", userRouter);
 app.use("/quiz", quizRouter);
-app.use("/quiz", quizRouter);
 
 app.listen(PORT, () => {
   console.log(`⚡ Server is running on http://localhost:${PORT}`);

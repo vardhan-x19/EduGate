@@ -109,6 +109,33 @@ router.get("/profile", authenticate, async (req: Request, res: Response) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// GET /users/:id/profile - returns top-3 recent prevSolved and average accuracy
+router.get("/:id/profile", authenticate, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    if (!id) return res.status(400).json({ error: "Missing user id" });
+
+    const user = await User.findById(id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const recent = user.getTopPrevSolved ? user.getTopPrevSolved(3) : [];
+    const avgAccuracy = user.getAverageAccuracy ? user.getAverageAccuracy() : 0;
+
+    res.status(200).json({
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+      recent,
+      avgAccuracy,
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
 router.post("/logout", (req: Request, res: Response) => {
   res.clearCookie("token"); // Clear the token cookie
   res.json({ message: "Logged out successfully" });

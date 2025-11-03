@@ -427,27 +427,49 @@ const QuizPlay = () => {
 
         {/* Submit Confirmation Dialog */}
         <AlertDialog open={showSubmitDialog} onOpenChange={setShowSubmitDialog}>
-          <AlertDialogContent>
+            <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Submit Quiz?</AlertDialogTitle>
               <AlertDialogDescription className="space-y-2">
-                <p>Are you sure you want to submit your quiz?</p>
-                <div className="pt-2 space-y-1 text-sm">
-                  <p>• Answered: {answeredCount} of {totalQuestions} questions</p>
-                  <p>• Unanswered: {totalQuestions - answeredCount} questions</p>
-                  {flaggedQuestions.size > 0 && (
-                    <p className="text-destructive">• Flagged for review: {flaggedQuestions.size} questions</p>
-                  )}
-                </div>
+              <p>Are you sure you want to submit your quiz?</p>
+              <div className="pt-2 space-y-1 text-sm">
+                <p>• Answered: {answeredCount} of {totalQuestions} questions</p>
+                <p>• Unanswered: {totalQuestions - answeredCount} questions</p>
+                {flaggedQuestions.size > 0 && (
+                <p className="text-destructive">• Flagged for review: {flaggedQuestions.size} questions</p>
+                )}
+              </div>
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Review Quiz</AlertDialogCancel>
-              <AlertDialogAction onClick={handleSubmit}>
-                Submit Quiz
+              <AlertDialogAction 
+              onClick={() => {
+                setShowSubmitDialog(false);
+                // Show loading state for 20 seconds
+                const loadingDialog = document.createElement('div');
+                loadingDialog.innerHTML = `
+                <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
+                       background: rgba(0,0,0,0.7); display: flex; 
+                       justify-content: center; align-items: center; z-index: 9999">
+                  <div style="background: white; padding: 20px; border-radius: 8px; 
+                      text-align: center;">
+                  Calculating Results...
+                  </div>
+                </div>
+                `;
+                document.body.appendChild(loadingDialog);
+                
+                setTimeout(() => {
+                document.body.removeChild(loadingDialog);
+                handleSubmit();
+                }, 5000);
+              }}
+              >
+              Submit Quiz
               </AlertDialogAction>
             </AlertDialogFooter>
-          </AlertDialogContent>
+            </AlertDialogContent>
         </AlertDialog>
       </div>
     </Layout>

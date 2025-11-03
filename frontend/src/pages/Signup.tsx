@@ -25,8 +25,9 @@ const Signup = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 3 seconds
     axios.post("http://localhost:5000/users/register", formData)
       .then(response => {
         console.log("Registration Processed:", response.data);

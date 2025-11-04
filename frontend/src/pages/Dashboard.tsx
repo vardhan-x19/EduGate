@@ -20,8 +20,13 @@ import {
   BookOpen,
   Users
 } from "lucide-react";
+
 import Layout from "@/components/layout/Layout";
 import { useSelector } from "react-redux";
+import axios from "axios";
+import { useEffect, useState } from "react";
+
+
 const Dashboard = () => {
   const userProfile = useSelector((state: any) => state.user.user);
   // Mock user data
@@ -29,49 +34,75 @@ const Dashboard = () => {
   const user = {
     name: userProfile.name || "Alex Rodriguez",
     avatar: userProfile.avatar || "",
-    level: userProfile.level || 1,
-    xp: userProfile.xp || 0,
-    xpToNextLevel: 0,
-    rank: "0",
-    streak: 0
   };
 
-  const stats = [
-    { label: "Quizzes Taken", value: "52", icon: Brain, color: "text-primary" },
-    { label: "Average Score", value: "91.2%", icon: Target, color: "text-success" },
-    { label: "Total XP", value: "2,720", icon: Star, color: "text-warning" },
-    { label: "Global Rank", value: "#2", icon: Trophy, color: "text-secondary" }
-  ];
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [recentQuizzes, setRecentQuizzes] = useState<any[]>([]);
+  const [avgAccuracy, setAvgAccuracy] = useState<number | null>(null);
 
-  const recentQuizzes = [
-    {
-      id: "1",
-      title: "JavaScript Fundamentals",
-      score: 95,
-      totalQuestions: 20,
-      timeCompleted: "2h ago",
-      difficulty: "Beginner",
-      topic: "Programming"
+  const stats = [
+    { 
+      label: "Quizzes Taken", 
+      value: recentQuizzes.length, 
+      icon: Brain, 
+      color: "text-primary" 
     },
-    {
-      id: "2",
-      title: "React Hooks Deep Dive",
-      score: 88,
-      totalQuestions: 15,
-      timeCompleted: "1d ago",
-      difficulty: "Advanced",
-      topic: "Programming"
-    },
-    {
-      id: "3",
-      title: "World Geography",
-      score: 92,
-      totalQuestions: 25,
-      timeCompleted: "2d ago",
-      difficulty: "Intermediate",
-      topic: "Geography"
+    { 
+      label: "Average Score", 
+      value: avgAccuracy !== null ? `${Math.round(avgAccuracy)}%` : '-', 
+      icon: Target, 
+      color: "text-success" 
     }
   ];
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const userId = userProfile?.id || userProfile?._id;
+        if (!userId) {
+          setError("User ID not available");
+          setLoading(false);
+          return;
+        }
+
+        const token = localStorage.getItem("quiztoken");
+        const headers: any = { "Content-Type": "application/json" };
+        if (token) headers.Authorization = `Bearer ${token}`;
+
+        const resp = await axios.get(`http://localhost:5000/users/${userId}/profile`, {
+          headers,
+          withCredentials: true,
+        });
+
+        const data = resp.data;
+        // data.recent is array as returned by backend
+        const recent = Array.isArray(data.recent) ? data.recent : [];
+        setRecentQuizzes(recent.map((r: any) => ({
+          id: r._id || r.quiz,
+          title: r.quizName || "Untitled Quiz",
+          score: typeof r.totalQuestions === 'number' && r.totalQuestions > 0 ? Math.round((r.score / r.totalQuestions) * 100) : Math.round(r.accuracy),
+          rawScore: r.score,
+          totalQuestions: r.totalQuestions || 0,
+          timeCompleted: r.solvedAt ? new Date(r.solvedAt).toLocaleString() : "-",
+          topic: r.topic || "-",
+          timeTaken: r.timeTaken,
+        })));
+
+        setAvgAccuracy(typeof data.avgAccuracy === 'number' ? data.avgAccuracy : null);
+      } catch (err: any) {
+        console.error(err);
+        setError(err.response?.data?.error || err.message || "Failed to fetch profile");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userProfile]);
 
   const badges = [
     { name: "First Quiz", description: "Completed your first quiz", earned: true, icon: "🎯" },
@@ -199,7 +230,10 @@ const Dashboard = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {recentQuizzes.map((quiz) => (
+                    {loading && <div>Loading recent quizzes...</div>}
+                    {error && <div className="text-destructive">{error}</div>}
+                    {!loading && !error && recentQuizzes.length === 0 && <div className="text-muted-foreground">No recent quizzes</div>}
+                    {!loading && !error && recentQuizzes.map((quiz) => (
                       <div key={quiz.id} className="flex items-center justify-between p-4 rounded-lg border hover:bg-muted/50 transition-colors">
                         <div className="flex items-center gap-4">
                           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-primary">
@@ -209,16 +243,13 @@ const Dashboard = () => {
                             <div className="font-semibold">{quiz.title}</div>
                             <div className="text-sm text-muted-foreground flex items-center gap-2">
                               <Badge variant="secondary">{quiz.topic}</Badge>
-                              <Badge className={getDifficultyColor(quiz.difficulty)}>
-                                {quiz.difficulty}
-                              </Badge>
                             </div>
                           </div>
                         </div>
                         <div className="text-right">
                           <div className="font-semibold text-primary">{quiz.score}%</div>
                           <div className="text-sm text-muted-foreground">
-                            {quiz.score}/{quiz.totalQuestions} • {quiz.timeCompleted}
+                            {quiz.rawScore}/{quiz.totalQuestions} • {quiz.timeCompleted}
                           </div>
                         </div>
                       </div>
@@ -273,7 +304,7 @@ const Dashboard = () => {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Progress Card */}
-            <motion.div
+            {/* <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
@@ -299,10 +330,10 @@ const Dashboard = () => {
                   </div>
                 </CardContent>
               </Card>
-            </motion.div>
+            </motion.div> */}
 
             {/* Streak Card */}
-            <motion.div
+            {/* <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
@@ -321,10 +352,10 @@ const Dashboard = () => {
                   </Button>
                 </CardContent>
               </Card>
-            </motion.div>
+            </motion.div> */}
 
             {/* Badges */}
-            <motion.div
+            {/* <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
@@ -359,10 +390,10 @@ const Dashboard = () => {
                   </div>
                 </CardContent>
               </Card>
-            </motion.div>
+            </motion.div> */}
 
             {/* Quick Actions */}
-            <motion.div
+            {/* <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 0.5 }}
@@ -392,7 +423,7 @@ const Dashboard = () => {
                   </Button>
                 </CardContent>
               </Card>
-            </motion.div>
+            </motion.div> */}
           </div>
         </div>
       </div>

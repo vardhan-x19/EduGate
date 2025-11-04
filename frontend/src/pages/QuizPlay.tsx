@@ -463,7 +463,7 @@ const QuizPlay = () => {
                 setTimeout(() => {
                 document.body.removeChild(loadingDialog);
                 handleSubmit();
-                }, 5000);
+                }, 3000);
               }}
               >
               Submit Quiz

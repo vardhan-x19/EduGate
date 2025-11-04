@@ -119,7 +119,7 @@ router.get("/:id/profile", authenticate, async (req: Request, res: Response) => 
     const user = await User.findById(id);
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    const recent = user.getTopPrevSolved ? user.getTopPrevSolved(3) : [];
+    const recent = user.getTopPrevSolved ? user.getTopPrevSolved(10) : [];
     const avgAccuracy = user.getAverageAccuracy ? user.getAverageAccuracy() : 0;
 
     res.status(200).json({

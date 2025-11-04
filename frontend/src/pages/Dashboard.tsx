@@ -29,6 +29,8 @@ import { useEffect, useState } from "react";
 
 const Dashboard = () => {
   const userProfile = useSelector((state: any) => state.user.user);
+  const role = userProfile.role;
+  console.log('role',role)
   // Mock user data
   console.log("User Profile from Redux:", userProfile);
   const user = {
@@ -37,24 +39,12 @@ const Dashboard = () => {
   };
 
   const [loading, setLoading] = useState(true);
+  const [size, setSize] = useState(3);
   const [error, setError] = useState<string | null>(null);
   const [recentQuizzes, setRecentQuizzes] = useState<any[]>([]);
   const [avgAccuracy, setAvgAccuracy] = useState<number | null>(null);
 
-  const stats = [
-    { 
-      label: "Quizzes Taken", 
-      value: recentQuizzes.length, 
-      icon: Brain, 
-      color: "text-primary" 
-    },
-    { 
-      label: "Average Score", 
-      value: avgAccuracy !== null ? `${Math.round(avgAccuracy)}%` : '-', 
-      icon: Target, 
-      color: "text-success" 
-    }
-  ];
+  
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -80,6 +70,7 @@ const Dashboard = () => {
         const data = resp.data;
         // data.recent is array as returned by backend
         const recent = Array.isArray(data.recent) ? data.recent : [];
+        setSize(recent.length);
         setRecentQuizzes(recent.map((r: any) => ({
           id: r._id || r.quiz,
           title: r.quizName || "Untitled Quiz",
@@ -103,7 +94,20 @@ const Dashboard = () => {
     fetchProfile();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userProfile]);
-
+   const stats = [
+    { 
+      label: "Quizzes Taken", 
+      value: size, 
+      icon: Brain, 
+      color: "text-primary" 
+    },
+    { 
+      label: "Average Score", 
+      value: avgAccuracy !== null ? `${Math.round(avgAccuracy)}%` : '-', 
+      icon: Target, 
+      color: "text-success" 
+    }
+  ];
   const badges = [
     { name: "First Quiz", description: "Completed your first quiz", earned: true, icon: "🎯" },
     { name: "Speed Runner", description: "Completed a quiz in under 5 minutes", earned: true, icon: "⚡" },

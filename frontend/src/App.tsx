@@ -96,6 +96,8 @@ import QuizResults from "./pages/QuizResult";
 const App = () => {
   const isLogin = useSelector((state: any) => state.user.isLoggedIn);
   const dispatch = useDispatch();
+  const userProfile = useSelector((state: any) => state.user.user);
+  const role = userProfile.role;
   useEffect(() => {
     const quizToken = localStorage.getItem("quiztoken");
     axios.get("http://localhost:5000/users/profile", {
@@ -130,17 +132,17 @@ const App = () => {
                 <Route path="*" element={<Login />} />
               </>
             ) : (
-              <>
+                <>
                 <Route path="/" element={<Landing />} />
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/quiz" element={<Quiz />} />
-                <Route path="/create" element={<Create />} />
+                {role === 'teacher' && <Route path="/create" element={<Create />} />}
                 <Route path="/leaderboard" element={<Leaderboard />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/quiz/:quizId/play" element={<QuizPlay />} />
                 <Route path="/quiz/:quizId/results" element={<QuizResults />} />
                 <Route path="*" element={<NotFound />} />
-              </>
+                </>
             )}
           </Routes>
         </BrowserRouter>

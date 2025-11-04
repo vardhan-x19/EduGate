@@ -1,9 +1,11 @@
-import { useLocation, useNavigate, Link } from "react-router-dom";
+import { useLocation, useNavigate, Link, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { useEffect } from "react";
+import axios from "axios";
 import { 
   Trophy, 
   Clock, 
@@ -24,8 +26,9 @@ const QuizResults = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
-
-
+  const params = useParams();
+  const quizId = (params as any).quizId || (params as any).id;
+  console.log('quizId', quizId);
   const {
     score,
     correctCount,
@@ -38,11 +41,62 @@ const QuizResults = () => {
     score: 0,
     correctCount: 0,
     totalQuestions: 0,
-    timeSpent: 0,
-    quizTitle: "Quiz",
-    answers: {},
-    questions: []
+      timeSpent: 0,
+      quizTitle: "Quiz",
+      answers: {},
+      questions: []
   };
+  const values={
+    score,
+    correctCount,
+    totalQuestions,
+    timeSpent,
+    quizTitle,
+    answers,
+    questions
+  };
+  const token = localStorage.getItem("quiztoken") || "";
+  useEffect(() => {
+    // only send when we have a valid quizId
+    if (!quizId) {
+      console.warn("QuizResults: quizId missing, skipping submit");
+      return;
+    }
+
+    const body = {
+      // backend expects score (number of correct answers) and accuracy (percentage)
+      score: typeof correctCount === 'number' ? correctCount : 0,
+      accuracy: (typeof totalQuestions === 'number' && totalQuestions > 0)
+        ? Math.round((correctCount / totalQuestions) * 100)
+        : Math.round(Number(score) || 0),
+      quizName: quizTitle,
+      topic: undefined,
+      completedDate: new Date().toISOString(),
+      totalQuestions: totalQuestions,
+      timeTaken: timeSpent,
+    } as any;
+
+    const send = async () => {
+      try {
+        await axios.post(
+          `http://localhost:5000/quiz/${quizId}/submit`,
+          body,
+          {
+            headers: {
+              Authorization: token ? `Bearer ${token}` : undefined,
+              "Content-Type": "application/json",
+            },
+            withCredentials: true,
+          }
+        );
+      } catch (err: any) {
+        console.error("Failed to submit quiz results:", err.response?.data || err.message || err);
+      }
+    };
+
+    send();
+    // only re-run when these specific values change
+  }, [quizId, correctCount, totalQuestions, timeSpent, quizTitle, token, score]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);

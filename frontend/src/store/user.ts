@@ -16,6 +16,7 @@ const userProfileSlice = createSlice({
       state.isLoggedIn = true;
       state.token = action.payload.token;
       state.user = action.payload.user;
+      state.user.role = action.payload.user.role;
     },
     register: (state, action) => {
       state.isLoggedIn = true;

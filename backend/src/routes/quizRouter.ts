@@ -125,8 +125,10 @@ router.get("/share/:code", async (req, res) => {
 // Student submits answers for a quiz — score, save attempt summary on user, optionally store full response
 router.post("/:id/submit", authenticate, async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const {id} = req.params;
+    console.log('id from req.params', req.params);
     if (!mongoose.Types.ObjectId.isValid(id)) {
+      console.log('invalid quiz id', id);
       return res.status(400).json({ error: "Invalid quiz ID" });
     }
 

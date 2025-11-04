@@ -31,6 +31,7 @@ const Login = () => {
       console.log("✅ Login success:", response.data.user);
       dispatch(login({ token: response.data.token, user: response.data.user }));
       localStorage.setItem("quiztoken", response.data.token);
+      console.log('response login',response.data.user);
       navigate("/"); // Redirect to dashboard on success
       // window.location.reload();
     } catch (error: any) {

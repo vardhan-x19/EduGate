@@ -12,15 +12,17 @@ const Header = () => {
   const isLogin = useSelector((state: any) => state.user.isLoggedIn);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
+  const userProfile = useSelector((state: any) => state.user.user);
+  const role = userProfile.role;
   const navigation = [
     { name: "Home", href: "/" },
     { name: "Take Quiz", href: "/quiz" },
-    { name: "Create Quiz", href: "/create" },
+    // show Create Quiz for everyone in the nav, but restrict action to teachers
+    { name: "Create Quiz", href: "/create", teacherOnly: true },
     { name: "Leaderboard", href: "/leaderboard" },
     { name: "Dashboard", href: "/dashboard" },
   ];
-
+   
   const isActive = (path: string) => location.pathname === path;
 
   const handleLogout = async () => {
@@ -29,6 +31,18 @@ const Header = () => {
     dispatch(logout());
     localStorage.removeItem("quiztoken");
     navigate("/login");
+  };
+
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  const handleCreateClick = (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    // if teacher, navigate to /create, else show modal
+    if (role && typeof role === "string" && role.toLowerCase() === "teacher") {
+      navigate("/create");
+    } else {
+      setIsCreateModalOpen(true);
+    }
   };
 
   return (
@@ -45,15 +59,27 @@ const Header = () => {
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-6">
           {navigation.map((item) => (
-            <Link
-              key={item.name}
-              to={item.href}
-              className={`text-sm font-medium transition-smooth hover:text-primary ${
-                isActive(item.href) ? "text-primary" : "text-muted-foreground"
-              }`}
-            >
-              {item.name}
-            </Link>
+            item.name === "Create Quiz" ? (
+              <button
+                key={item.name}
+                onClick={handleCreateClick}
+                className={`text-sm font-medium transition-smooth hover:text-primary ${
+                  isActive(item.href) ? "text-primary" : "text-muted-foreground"
+                }`}
+              >
+                {item.name}
+              </button>
+            ) : (
+              <Link
+                key={item.name}
+                to={item.href}
+                className={`text-sm font-medium transition-smooth hover:text-primary ${
+                  isActive(item.href) ? "text-primary" : "text-muted-foreground"
+                }`}
+              >
+                {item.name}
+              </Link>
+            )
           ))}
         </nav>
 
@@ -99,16 +125,28 @@ const Header = () => {
       >
         <div className="container py-4 space-y-3">
           {navigation.map((item) => (
-            <Link
-              key={item.name}
-              to={item.href}
-              className={`block py-2 text-sm font-medium transition-smooth hover:text-primary ${
-                isActive(item.href) ? "text-primary" : "text-muted-foreground"
-              }`}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              {item.name}
-            </Link>
+            item.name === "Create Quiz" ? (
+              <button
+                key={item.name}
+                onClick={() => { setIsMenuOpen(false); handleCreateClick(); }}
+                className={`block w-full text-left py-2 text-sm font-medium transition-smooth hover:text-primary ${
+                  isActive(item.href) ? "text-primary" : "text-muted-foreground"
+                }`}
+              >
+                {item.name}
+              </button>
+            ) : (
+              <Link
+                key={item.name}
+                to={item.href}
+                className={`block py-2 text-sm font-medium transition-smooth hover:text-primary ${
+                  isActive(item.href) ? "text-primary" : "text-muted-foreground"
+                }`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {item.name}
+              </Link>
+            )
           ))}
           <div className="pt-3 border-t space-y-2">
             {isLogin ? (
@@ -134,6 +172,19 @@ const Header = () => {
           </div>
         </div>
       </motion.div>
+      {/* Create-Only-Teachers Modal */}
+      {isCreateModalOpen && (
+        <div className="fixed inset-0 z-50 top-7 flex items-center justify-center">
+          <div className="absolute inset-0 " onClick={() => setIsCreateModalOpen(false)} />
+          <div className="relative bg-white dark:bg-slate-900 rounded-lg shadow-lg w-full max-w-md p-6">
+            <h3 className="text-lg font-semibold mb-2">Teacher Access Required</h3>
+            <p className="text-sm text-muted-foreground mb-4">Only users with the "teacher" role can create quizzes. If you are an instructor, please contact your administrator to upgrade your account.</p>
+            <div className="flex justify-end gap-2">
+              <Button variant="ghost" onClick={() => setIsCreateModalOpen(false)}>Close</Button>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 };
